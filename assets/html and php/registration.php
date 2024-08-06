@@ -19,13 +19,13 @@ $conn = new mysqli($servername, $dbusername, $dbpassword);
 
 // Check connection
 if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+    die(json_encode(['status' => 'error', 'message' => "Connection failed: " . $conn->connect_error]));
 }
 
 // Create database if it does not exist
 $sql = "CREATE DATABASE IF NOT EXISTS $dbname";
 if ($conn->query($sql) !== TRUE) {
-    die("Error creating database: " . $conn->error);
+    die(json_encode(['status' => 'error', 'message' => "Error creating database: " . $conn->error]));
 }
 
 // Select the database
@@ -41,14 +41,11 @@ $table_sql = "CREATE TABLE IF NOT EXISTS users (
 )";
 
 if ($conn->query($table_sql) !== TRUE) {
-    die("Error creating table: " . $conn->error);
+    die(json_encode(['status' => 'error', 'message' => "Error creating table: " . $conn->error]));
 }
 
 // Check if data is submitted
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Debugging: Log request method
-    error_log("Request method: " . $_SERVER['REQUEST_METHOD']);
-    
     // Get form data
     $email = $_POST['email'];
     $username = $_POST['username'];
@@ -66,12 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $stmt->store_result();
             
             if ($stmt->num_rows > 0) {
-                // Store form data in session
-                $_SESSION['email'] = $email;
-                $_SESSION['username'] = $username;
-                $_SESSION['error'] = 'Email or username already exists!';
-                header('Location: registration_form.php');
-                exit;
+                echo json_encode(['status' => 'error', 'message' => 'Email or username already exists!']);
             } else {
                 // Hash the password
                 $hashed_password = password_hash($password1, PASSWORD_DEFAULT);
@@ -82,30 +74,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                 // Execute the statement
                 if ($stmt->execute()) {
-                    echo "Registration successful!";
-                    // Clear session data
-                    session_unset();
+                    echo json_encode(['status' => 'success', 'message' => 'Registration successful!']);
                 } else {
-                    echo 'Error: ' . $stmt->error;
+                    echo json_encode(['status' => 'error', 'message' => 'Error: ' . $stmt->error]);
                 }
             }
 
             // Close the statement
             $stmt->close();
         } else {
-            $_SESSION['error'] = 'Passwords do not match!';
-            header('Location: registration_form.php');
-            exit;
+            echo json_encode(['status' => 'error', 'message' => 'Passwords do not match!']);
         }
     } else {
-        $_SESSION['error'] = 'Please fill in all fields!';
-        header('Location: registration_form.php');
-        exit;
+        echo json_encode(['status' => 'error', 'message' => 'Please fill in all fields!']);
     }
 } else {
-    // Debugging: Log wrong method access
-    error_log("Wrong request method: " . $_SERVER['REQUEST_METHOD']);
-    echo 'Invalid request method. Please use the registration form.';
+    echo json_encode(['status' => 'error', 'message' => 'Invalid request method. Please use the registration form.']);
 }
 
 // Close the connection

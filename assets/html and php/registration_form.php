@@ -16,20 +16,15 @@ session_start();
         <h1 class="text-center">Register to To-Do List</h1>
         <div class="row justify-content-center mt-4">
             <div class="col-md-6">
-                <?php
-                if (isset($_SESSION['error'])) {
-                    echo '<div class="alert alert-danger" role="alert">' . $_SESSION['error'] . '</div>';
-                    unset($_SESSION['error']);
-                }
-                ?>
-                <form id="register-form" action="registration.php" method="POST">
+                <div id="error-message" class="alert alert-danger" role="alert" style="display: none;"></div>
+                <form id="register-form">
                     <div class="form-group">
                         <label for="email">Email</label>
-                        <input type="email" class="form-control" id="email" name="email" value="<?php echo isset($_SESSION['email']) ? htmlspecialchars($_SESSION['email']) : ''; ?>" required>
+                        <input type="email" class="form-control" id="email" name="email" required>
                     </div>
                     <div class="form-group">
                         <label for="username">Username</label>
-                        <input type="text" class="form-control" id="username" name="username" value="<?php echo isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username']) : ''; ?>" required>
+                        <input type="text" class="form-control" id="username" name="username" required>
                     </div>
                     <div class="form-group">
                         <label for="password1">Password</label>
@@ -47,9 +42,28 @@ session_start();
             </div>
         </div>
     </div>
-    <script src="/assets/js/scripts.js"></script>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#register-form').on('submit', function(e) {
+                e.preventDefault();
+                $.ajax({
+                    type: 'POST',
+                    url: 'registration.php',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        const res = JSON.parse(response);
+                        if (res.status === 'error') {
+                            $('#error-message').text(res.message).show();
+                        } else {
+                            window.location.href = 'login_form.php';
+                        }
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
