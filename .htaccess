@@ -1,9 +1,16 @@
-<FilesMatch "\.(php)$">
-    SetHandler application/x-httpd-php
-</FilesMatch>
-
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteCond %{REQUEST_METHOD} ^(POST|GET)$
-    RewriteRule ^(assets/php/register.php)$ $1 [L]
+
+    # Ensure register.php can be accessed directly
+    RewriteRule ^register.php$ register.php [L]
 </IfModule>
+
+# Deny access to .htaccess itself
+<Files ".htaccess">
+    Require all denied
+</Files>
+
+# Allow access to register.php
+<Files "register.php">
+    Require all granted
+</Files>
