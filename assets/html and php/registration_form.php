@@ -1,3 +1,7 @@
+<?php
+session_start();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,14 +16,20 @@
         <h1 class="text-center">Register to To-Do List</h1>
         <div class="row justify-content-center mt-4">
             <div class="col-md-6">
-                <form id="register-form" action="register.php" method="POST">
+                <?php
+                if (isset($_SESSION['error'])) {
+                    echo '<div class="alert alert-danger" role="alert">' . $_SESSION['error'] . '</div>';
+                    unset($_SESSION['error']);
+                }
+                ?>
+                <form id="register-form" action="registration.php" method="POST">
                     <div class="form-group">
                         <label for="email">Email</label>
-                        <input type="email" class="form-control" id="email" name="email" required>
+                        <input type="email" class="form-control" id="email" name="email" value="<?php echo isset($_SESSION['email']) ? htmlspecialchars($_SESSION['email']) : ''; ?>" required>
                     </div>
                     <div class="form-group">
                         <label for="username">Username</label>
-                        <input type="text" class="form-control" id="username" name="username" required>
+                        <input type="text" class="form-control" id="username" name="username" value="<?php echo isset($_SESSION['username']) ? htmlspecialchars($_SESSION['username']) : ''; ?>" required>
                     </div>
                     <div class="form-group">
                         <label for="password1">Password</label>

@@ -5,6 +5,9 @@ ini_set('display_errors', 1);
 
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
+// Start session to store form data
+session_start();
+
 // Database connection settings
 $servername = "localhost";
 $dbusername = "root";
@@ -56,27 +59,48 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (!empty($email) && !empty($username) && !empty($password1) && !empty($password2)) {
         // Check if passwords match
         if ($password1 === $password2) {
-            // Hash the password
-            $hashed_password = password_hash($password1, PASSWORD_DEFAULT);
-
-            // Prepare SQL statement
-            $stmt = $conn->prepare('INSERT INTO users (email, username, password) VALUES (?, ?, ?)');
-            $stmt->bind_param('sss', $email, $username, $hashed_password);
-
-            // Execute the statement
-            if ($stmt->execute()) {
-                echo "Registration successful!";
+            // Check if email or username already exists
+            $stmt = $conn->prepare('SELECT id FROM users WHERE email = ? OR username = ?');
+            $stmt->bind_param('ss', $email, $username);
+            $stmt->execute();
+            $stmt->store_result();
+            
+            if ($stmt->num_rows > 0) {
+                // Store form data in session
+                $_SESSION['email'] = $email;
+                $_SESSION['username'] = $username;
+                $_SESSION['error'] = 'Email or username already exists!';
+                header('Location: registration_form.php');
+                exit;
             } else {
-                echo 'Error: ' . $stmt->error;
+                // Hash the password
+                $hashed_password = password_hash($password1, PASSWORD_DEFAULT);
+
+                // Prepare SQL statement
+                $stmt = $conn->prepare('INSERT INTO users (email, username, password) VALUES (?, ?, ?)');
+                $stmt->bind_param('sss', $email, $username, $hashed_password);
+
+                // Execute the statement
+                if ($stmt->execute()) {
+                    echo "Registration successful!";
+                    // Clear session data
+                    session_unset();
+                } else {
+                    echo 'Error: ' . $stmt->error;
+                }
             }
 
             // Close the statement
             $stmt->close();
         } else {
-            echo 'Passwords do not match!';
+            $_SESSION['error'] = 'Passwords do not match!';
+            header('Location: registration_form.php');
+            exit;
         }
     } else {
-        echo 'Please fill in all fields!';
+        $_SESSION['error'] = 'Please fill in all fields!';
+        header('Location: registration_form.php');
+        exit;
     }
 } else {
     // Debugging: Log wrong method access
