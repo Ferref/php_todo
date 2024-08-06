@@ -37,7 +37,7 @@ session_start();
                     <button type="submit" class="btn btn-primary btn-block">Register</button>
                 </form>
                 <div class="text-center mt-3">
-                    <a href="login.html">Do you already have an account? Login here!</a>
+                    <a href="login_form.php">Do you already have an account? Login here!</a>
                 </div>
             </div>
         </div>
