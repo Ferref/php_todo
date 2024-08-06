@@ -1,14 +1,18 @@
 <?php
+// Enable error reporting for debugging purposes (remove in production)
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 // Database connection settings
 $servername = "localhost";
-$username = "root";
-$password = "";
+$dbusername = "root";
+$dbpassword = "";
 $dbname = "users_db";
 
 // Create connection
-$conn = new mysqli($servername, $username, $password);
+$conn = new mysqli($servername, $dbusername, $dbpassword);
 
 // Check connection
 if ($conn->connect_error) {
@@ -17,9 +21,7 @@ if ($conn->connect_error) {
 
 // Create database if it does not exist
 $sql = "CREATE DATABASE IF NOT EXISTS $dbname";
-if ($conn->query($sql) === TRUE) {
-    echo "Database checked/created successfully<br>";
-} else {
+if ($conn->query($sql) !== TRUE) {
     die("Error creating database: " . $conn->error);
 }
 
@@ -35,14 +37,15 @@ $table_sql = "CREATE TABLE IF NOT EXISTS users (
     reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 )";
 
-if ($conn->query($table_sql) === TRUE) {
-    echo "Table 'users' checked/created successfully<br>";
-} else {
+if ($conn->query($table_sql) !== TRUE) {
     die("Error creating table: " . $conn->error);
 }
 
 // Check if data is submitted
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Debugging: Log request method
+    error_log("Request method: " . $_SERVER['REQUEST_METHOD']);
+    
     // Get form data
     $email = $_POST['email'];
     $username = $_POST['username'];
@@ -75,6 +78,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     } else {
         echo 'Please fill in all fields!';
     }
+} else {
+    // Debugging: Log wrong method access
+    error_log("Wrong request method: " . $_SERVER['REQUEST_METHOD']);
+    echo 'Invalid request method. Please use the registration form.';
 }
 
 // Close the connection

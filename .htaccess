@@ -1,4 +1,9 @@
-RewriteEngine On
-# If a requested file or directory does not exist, forward the request to index.html
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^ index.html [QSA,L]
+<FilesMatch "\.(php)$">
+    SetHandler application/x-httpd-php
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_METHOD} ^(POST|GET)$
+    RewriteRule ^(assets/php/register.php)$ $1 [L]
+</IfModule>
